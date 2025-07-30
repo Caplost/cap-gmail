@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: gmail_forwarding_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: gmail_forwarding
+      MYSQL_USER: gmail_user
+      MYSQL_PASSWORD: gmail_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: unless-stopped
+
+  app:
+    build: .
+    container_name: gmail_forwarding_app
+    depends_on:
+      - mysql
+    ports:
+      - "8080:8080"
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: gmail_user
+      DB_PASSWORD: gmail_pass
+      DB_NAME: gmail_forwarding
+      SERVER_PORT: 8080
+    volumes:
+      - ./credentials.json:/app/credentials.json
+      - ./token.json:/app/token.json
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
